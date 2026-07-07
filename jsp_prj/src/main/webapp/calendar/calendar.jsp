@@ -63,15 +63,45 @@ $( function(){
 <div id="calWarp">
 <%
 Calendar cal=Calendar.getInstance();
-int nowYear=cal.get(Calendar.YEAR);
-int nowMonth=cal.get(Calendar.MONTH)+1;
+//오늘의 요일을 표현하기위해서 오늘정보를 저장한 후 비교 한다.
+StringBuilder toDay=new StringBuilder();
+toDay.append(cal.get(Calendar.YEAR)).append(cal.get(Calendar.MONTH)+1);
+
+
+int nowYear=0;
+int nowMonth=0;
+
+String year=request.getParameter("year");
+if(year != null ){
+	cal.set(Calendar.YEAR, Integer.parseInt(year) );
+}//end for
+
+nowYear=cal.get(Calendar.YEAR);
+
+String month=request.getParameter("month");
+if( month != null ){//month라는 web parameter가 존재 하면
+cal.set(Calendar.MONTH, Integer.parseInt(month)-1 );	
+}//end if
+
+nowMonth=cal.get(Calendar.MONTH)+1;
+
 int nowDay=cal.get(Calendar.DAY_OF_MONTH);
 
+//log( toDay.toString() );//toDay 현재 년, 현재 월
+StringBuilder selectDay=new StringBuilder();
+selectDay.append(nowYear).append(nowMonth);
+//log( selectDay.toString() );//selectDay 선택한 년, 선택한 월
+
+//toDay와 selectDay가 같으면 true 출력하고 다르면 false를 출력
+//log( String.valueOf( toDay.toString().equals( selectDay.toString()) ));
+
+//오늘을 표현하기위한 flag변수
+boolean toDayFlag= toDay.toString().equals( selectDay.toString());
 %>
 <div id="calHeader">
-<a href="#void" title="이전 월">&lt;&lt;</a>
-<a href="#void" title="오늘"><span class="calTitle"><%= nowYear %>.<%= nowMonth %></span></a>
-<a href="#void" title="다음 월">&gt;&gt;</a>
+<a href="calendar.jsp?month=<%= nowMonth-1==0?12:nowMonth-1 %>&year=<%= nowMonth-1==0? nowYear-1:nowYear %>" title="이전 월">&lt;&lt;</a>
+<a href="calendar.jsp" title="오늘"><span class="calTitle"><%= nowYear %>.<%= nowMonth %></span></a>
+<a href="calendar.jsp?month=<%= nowMonth+1==13?1:nowMonth+1 %>&year=<%= nowMonth+1==13? nowYear+1:nowYear %>" title="다음 월">&gt;&gt;</a>
 </div>
 <div id="calContainer">
 <table id="calTab">
@@ -131,7 +161,7 @@ for(int tempDay=1;  ; tempDay++){ //1일에서 부터 무한루프로 증가시�
 	}//end switch
 	
 	tdCss="dayCss";
-	if(tempDay == nowDay){
+	if(toDayFlag && tempDay == nowDay){
 		tdCss="toDayCss";
 	}//end if
 	
